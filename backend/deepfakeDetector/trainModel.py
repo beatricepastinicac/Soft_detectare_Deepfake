@@ -117,7 +117,7 @@ def train_model(data_dir, model_save_path, batch_size=32):
     plt.legend(loc='lower right')
     plt.savefig('training_history.png')
 
-    print(f"✅ Modelul a fost salvat la {model_save_path}")
+    print(f"Modelul a fost salvat la {model_save_path}")
 
 if __name__ == "__main__":
     data_dir = 'backend/deepfakeDetector/dataSet'  
