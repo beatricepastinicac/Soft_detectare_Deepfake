@@ -1,0 +1,19 @@
+{
+  "name": "aplicatie-licenta",
+  "version": "1.0.0",
+  "description": "Aplicație pentru licență",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "mysql2": "^3.3.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.22"
+  }
+}
