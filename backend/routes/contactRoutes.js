@@ -4,8 +4,9 @@ const db = require('../db');
 
 let logger;
 
-router.once('mount', function(parent) {
-  logger = parent.locals.logger;
+router.use((req, res, next) => {
+  logger = req.app.locals.logger;
+  next();
 });
 
 router.post('/', async (req, res) => {

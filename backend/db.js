@@ -4,8 +4,8 @@ const mysql = require('mysql2');
 const pool = mysql.createPool({
   host: 'localhost',
   user: 'root',
-  password: 'beatrice32',  
-  database: 'deepfake_detection',  
+  password: '',  
+  database: 'deepfakedetection',  
   port: 3306,
 });
 

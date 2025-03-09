@@ -10,8 +10,9 @@ const execPromise = promisify(exec);
 
 let logger;
 
-router.once('mount', function(parent) {
-  logger = parent.locals.logger;
+router.use(function (req, res, next) {
+  logger = req.app.locals.logger;
+  next();
 });
 
 const uploadsDir = path.join(__dirname, '/../uploads/');
