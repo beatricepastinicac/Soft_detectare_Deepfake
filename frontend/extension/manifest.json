@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "Detectare Deepfake",
+  "description": "Extensie pentru detectarea conținutului deepfake în pagini web.",
+  "version": "1.0",
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": "images/icon.png"
+  },
+  "permissions": [
+    "tabs",
+    "activeTab",
+    "storage",
+    "scripting"
+  ],
+  "background": {
+    "service_worker": "js/background.js"
+  },
+  "host_permissions": [
+    "<all_urls>"
+  ]
+}

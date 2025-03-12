@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BeeDetection</title>
+    <link rel="stylesheet" href="css/popup.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="app">
+        <header>
+            <h1>BeeDetection</h1>
+            <p>Verificați conținutul pentru a detecta deepfake-uri</p>
+        </header>
+        
+        <div id="loading" class="hidden">
+            <div class="spinner"></div>
+            <p>Analizare în curs...</p>
+        </div>
+        
+        <div id="result-container" class="hidden">
+            <h2>Rezultat Scanare</h2>
+            <div id="result-details">
+                <div class="score-meter">
+                    <div id="score-indicator"></div>
+                </div>
+                <div id="result-text"></div>
+            </div>
+        </div>
+        
+        <form id="uploadForm">
+            <div class="file-input-container">
+                <label for="mediaFile">Selectați fișierul pentru analiză</label>
+                <input type="file" id="mediaFile" accept="image/*, video/*" />
+                <span id="file-name">Niciun fișier selectat</span>
+            </div>
+            
+            <div class="form-group">
+                <label for="userId">ID Utilizator (opțional)</label>
+                <input type="text" id="userId" placeholder="Lăsați gol pentru scanare anonimă" />
+            </div>
+            
+            <button type="submit" id="scan-button">Scanează conținutul</button>
+        </form>
+        
+        <div class="settings-toggle">
+            <button id="toggle-settings">Setări</button>
+        </div>
+        
+        <div id="settings-panel" class="hidden">
+            <h3>Setări</h3>
+            <div class="setting-item">
+                <label for="api-url">URL API</label>
+                <input type="text" id="api-url" value="http://localhost:5000/api/analysis/upload" />
+            </div>
+            <div class="setting-item">
+                <label for="auto-scan">
+                    <input type="checkbox" id="auto-scan" />
+                    Activează scanarea automată a imaginilor
+                </label>
+            </div>
+            <button id="save-settings">Salvează</button>
+        </div>
+        
+        <footer>
+            <p>Istoric scanări recente</p>
+            <div id="history-list"></div>
+        </footer>
+    </div>
+    <script src="js/popup.js"></script>
+</body>
+</html>

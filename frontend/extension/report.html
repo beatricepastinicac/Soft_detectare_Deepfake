@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Raport Detectare Deepfake</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/report.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>BeeDetection</h1>
+      <p>Raport de scanare conținut</p>
+    </header>
+    
+    <div class="stats-container">
+      <div class="stat-card">
+        <h3>Total scanări</h3>
+        <div class="stat-value" id="total-scans">0</div>
+      </div>
+      <div class="stat-card">
+        <h3>Deepfakes detectate</h3>
+        <div class="stat-value" id="detected-fakes">0</div>
+      </div>
+      <div class="stat-card">
+        <h3>Conținut autentic</h3>
+        <div class="stat-value" id="authentic-content">0</div>
+      </div>
+    </div>
+    
+    <section class="report-section">
+      <h2>Istoricul scanărilor</h2>
+      <div class="filter-controls">
+        <div class="filter-group">
+          <label for="date-filter">Filtrare după dată:</label>
+          <select id="date-filter">
+            <option value="all">Toate perioadele</option>
+            <option value="today">Astăzi</option>
+            <option value="week">Ultima săptămână</option>
+            <option value="month">Ultima lună</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label for="source-filter">Filtrare după sursă:</label>
+          <select id="source-filter">
+            <option value="all">Toate sursele</option>
+           
+          </select>
+        </div>
+        <div class="filter-group">
+          <label for="risk-filter">Filtrare după risc:</label>
+          <select id="risk-filter">
+            <option value="all">Toate nivelurile</option>
+            <option value="high">Risc ridicat</option>
+            <option value="medium">Risc mediu</option>
+            <option value="low">Risc scăzut</option>
+          </select>
+        </div>
+      </div>
+      
+      <div class="history-table-container">
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Fișier</th>
+              <th>Sursă</th>
+              <th>Scor Deepfake</th>
+              <th>Risc</th>
+            </tr>
+          </thead>
+          <tbody id="history-table-body">
+    
+          </tbody>
+        </table>
+      </div>
+    </section>
+    
+    <section class="settings-section">
+      <h2>Setări</h2>
+      <div class="settings-form">
+        <div class="setting-item">
+          <label for="auto-scan-setting">
+            <input type="checkbox" id="auto-scan-setting">
+            Activează scanarea automată a conținutului
+          </label>
+          <p class="setting-description">Când este activată, extensia va scana automat conținutul de pe rețelele sociale.</p>
+        </div>
+        
+        <div class="setting-item">
+          <label for="notifications-setting">
+            <input type="checkbox" id="notifications-setting">
+            Activează notificările
+          </label>
+          <p class="setting-description">Primește notificări când este detectat un posibil deepfake.</p>
+        </div>
+        
+        <div class="setting-item">
+          <label for="api-url-setting">URL API</label>
+          <input type="text" id="api-url-setting">
+          <p class="setting-description">URL-ul serverului de analiză deepfake.</p>
+        </div>
+        
+        <button id="save-settings-btn" class="primary-button">Salvează setările</button>
+      </div>
+    </section>
+  </div>
+  
+  <footer>
+    <p>&copy; 2025 BeeDetection</p>
+  </footer>
+  
+  <script src="js/report.js"></script>
+</body>
+</html>
