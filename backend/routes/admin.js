@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const adminModel = require('../models/adminModel');
 const db = require('../db');
 
 let logger;
@@ -11,37 +12,10 @@ router.use((req, res, next) => {
 router.get('/dashboard', async (req, res) => {
   try {
     logger && logger.info('Cerere pentru datele dashboard-ului de administrare');
-    
-    const [stats] = await db.execute('SELECT * FROM statistics');
-    const [usersCount] = await db.execute('SELECT COUNT(*) as count FROM users');
-    const [reportsCount] = await db.execute('SELECT COUNT(*) as count FROM reports');
-    const [unreadContactsCount] = await db.execute('SELECT COUNT(*) as count FROM contacts WHERE is_read = 0');
-    const [latestReports] = await db.execute(`
-      SELECT r.id, r.file_name, r.fake_score, r.uploaded_at, u.username
-      FROM reports r
-      LEFT JOIN users u ON r.user_id = u.id
-      ORDER BY r.uploaded_at DESC
-      LIMIT 5
-    `);
-    const [latestUsers] = await db.execute(`
-      SELECT id, username, email, created_at
-      FROM users
-      ORDER BY created_at DESC
-      LIMIT 5
-    `);
-    
-    res.status(200).json({
-      stats: stats.length > 0 ? stats[0] : null,
-      counts: {
-        users: usersCount[0].count,
-        reports: reportsCount[0].count,
-        unreadContacts: unreadContactsCount[0].count
-      },
-      latestReports,
-      latestUsers
-    });
+    const dashboardData = await adminModel.getDashboardData();
+    res.status(200).json(dashboardData);
   } catch (error) {
-    logger && logger.error('Eroare la obținerea datelor pentru dashboard:', error);
+    logger && logger.error('Eroare la obținerea datelor pentru dashboard:', JSON.stringify(error));
     res.status(500).json({ message: 'Eroare la obținerea datelor pentru dashboard', error: error.message });
   }
 });
@@ -76,7 +50,6 @@ router.post('/contacts/mark-read', async (req, res) => {
   
   try {
     const placeholders = contactIds.map(() => '?').join(', ');
-    
     const [result] = await db.execute(
       `UPDATE contacts SET is_read = 1 WHERE id IN (${placeholders})`,
       contactIds
@@ -87,7 +60,7 @@ router.post('/contacts/mark-read', async (req, res) => {
       updatedCount: result.affectedRows 
     });
   } catch (error) {
-    logger && logger.error('Eroare la marcarea contactelor ca citite:', error);
+    logger && logger.error('Eroare la marcarea contactelor ca citite:', JSON.stringify(error));
     res.status(500).json({ message: 'Eroare la marcarea contactelor ca citite', error: error.message });
   }
 });
@@ -97,10 +70,9 @@ router.post('/maintenance/analyze-tables', async (req, res) => {
   
   try {
     await db.execute('ANALYZE TABLE reports, media_files, users, contacts, statistics');
-    
     res.status(200).json({ message: 'Tabelele au fost analizate cu succes' });
   } catch (error) {
-    logger && logger.error('Eroare la analiza tabelelor:', error);
+    logger && logger.error('Eroare la analiza tabelelor:', JSON.stringify(error));
     res.status(500).json({ message: 'Eroare la analiza tabelelor', error: error.message });
   }
 });

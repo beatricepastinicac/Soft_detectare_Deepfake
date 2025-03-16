@@ -8,8 +8,9 @@ const writeFileAsync = promisify(fs.writeFile);
 const mkdirAsync = promisify(fs.mkdir);
 
 let logger;
-router.once('mount', function(parent) {
-  logger = parent.locals.logger;
+router.use((req, res, next) => {
+  logger = req.app.locals.logger;
+  next();
 });
 
 router.get('/user/:userId', async (req, res) => {
@@ -25,10 +26,9 @@ router.get('/user/:userId', async (req, res) => {
       limit, 
       offset
     );
-    
     res.status(200).json(reports);
   } catch (error) {
-    logger && logger.error(`Eroare la obținerea rapoartelor avansate pentru user ${userId}:`, error);
+    logger && logger.error(`Eroare la obținerea rapoartelor avansate pentru user ${userId}:`, JSON.stringify(error));
     res.status(500).json({ message: 'Eroare la obținerea rapoartelor avansate', error: error.message });
   }
 });
@@ -131,7 +131,7 @@ router.get('/comparison', async (req, res) => {
     
     res.status(200).json(comparison);
   } catch (error) {
-    logger && logger.error('Eroare la compararea rapoartelor:', error);
+    logger && logger.error('Eroare la compararea rapoartelor:', JSON.stringify(error));
     res.status(500).json({ message: 'Eroare la compararea rapoartelor', error: error.message });
   }
 });

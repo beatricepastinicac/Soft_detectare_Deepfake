@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
+const statsModel = require('../models/statsModel');
 
 let logger;
 router.use((req, res, next) => {
@@ -63,11 +64,11 @@ router.get('/daily', async (req, res) => {
   try {
     logger && logger.info('Cerere pentru statistici zilnice');
     
-    const [rows] = await db.execute('SELECT * FROM vw_daily_stats ORDER BY analysis_date DESC LIMIT 30');
+    const dailyStats = await statsModel.getDailyStats(30);
     
-    res.status(200).json(rows);
+    res.status(200).json(dailyStats);
   } catch (error) {
-    logger && logger.error('Eroare la obținerea statisticilor zilnice:', error);
+    logger && logger.error('Eroare la obținerea statisticilor zilnice:', JSON.stringify(error));
     res.status(500).json({ message: 'Eroare la obținerea statisticilor zilnice', error: error.message });
   }
 });
@@ -80,7 +81,7 @@ router.get('/users', async (req, res) => {
     
     res.status(200).json(rows);
   } catch (error) {
-    logger && logger.error('Eroare la obținerea statisticilor pe utilizatori:', error);
+    logger && logger.error('Eroare la obținerea statisticilor pe utilizatori:', JSON.stringify(error));
     res.status(500).json({ message: 'Eroare la obținerea statisticilor pe utilizatori', error: error.message });
   }
 });
