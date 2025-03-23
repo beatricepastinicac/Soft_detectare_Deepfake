@@ -5,6 +5,7 @@ const path = require('path');
 const { exec } = require('child_process');
 const { promisify } = require('util');
 const execPromise = promisify(exec);
+const db = require('../db');
 
 let logger;
 
@@ -18,17 +19,13 @@ if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
 
-const mediaProcessingQueue = {
-  add: async (jobData) => {
-    logger && logger.info(`Job fals adăugat în coadă: ${JSON.stringify(jobData)}`);
-    return { id: Date.now() };
-  },
-  process: () => {
-    logger && logger.info('Înregistrare processor coadă fictivă');
-  }
-};
-
-mediaProcessingQueue.process();
+function generateSafeFileName(originalName) {
+  const sanitizedName = originalName.replace(/[^a-zA-Z0-9._-]/g, '_');
+  const timestamp = Date.now();
+  const ext = path.extname(sanitizedName);
+  const baseName = path.basename(sanitizedName, ext);
+  return `${baseName}_${timestamp}${ext}`;
+}
 
 router.post('/upload', async (req, res) => {
   if (!req.files || Object.keys(req.files).length === 0) {
@@ -42,10 +39,12 @@ router.post('/upload', async (req, res) => {
     return res.status(400).json({ error: 'Fișierul trebuie trimis cu numele "video", "media" sau "file".' });
   }
 
-  const uploadPath = path.join(__dirname, '/../uploads/', mediaFile.name);
+  const safeFileName = generateSafeFileName(mediaFile.name);
+  const uploadPath = path.join(uploadsDir, safeFileName);
+  const originalFileName = mediaFile.name;
   const userId = req.body.userId || null;
 
-  logger && logger.info(`Fișier primit: ${mediaFile.name}, dimensiune: ${mediaFile.size} bytes, tip: ${mediaFile.mimetype}, de la utilizatorul: ${userId}`);
+  logger && logger.info(`Fișier primit: ${mediaFile.name} (salvat ca ${safeFileName}), dimensiune: ${mediaFile.size} bytes, tip: ${mediaFile.mimetype}, de la utilizatorul: ${userId}`);
 
   try {
     await mediaFile.mv(uploadPath);
@@ -72,59 +71,54 @@ router.post('/upload', async (req, res) => {
     }
 
     logger && logger.info('Rulează detectorul deepfake...');
-    const filePath = uploadPath.replace(/\\/g, '/');
-    const detectorScript = path.join(__dirname, '/../deepfakeDetector/deepfakeDetector.py');
+    const filePath = path.normalize(uploadPath);
+    const detectorScript = path.normalize(path.join(__dirname, '/../deepfakeDetector/deepfakeDetector.py'));
+    
     const command = `python "${detectorScript}" "${filePath}"`;
     
-    logger && logger.debug(`Comandă execuție: ${command}`);
+    logger && logger.info(`Comandă execuție: ${command}`);
+    
     let detectionResult;
-
+    
     try {
       const execStart = Date.now();
-      const { stdout, stderr } = await execPromise(command);
+      const { stdout, stderr } = await execPromise(command, { timeout: 120000 });
       const execDuration = Date.now() - execStart;
       logger && logger.info(`Analiză executată în ${execDuration}ms`);
 
-      if (stderr && !stderr.includes("WARNING")) {
-        logger && logger.error('Eroare la execuția scriptului:', stderr);
-        throw new Error(`Eroare la execuția scriptului detector: ${stderr}`);
-      }
-
       try {
-        logger && logger.debug('Răspuns primit de la detectorul deepfake:', stdout);
-        detectionResult = JSON.parse(stdout);
-      } catch (parseError) {
-        logger && logger.error('Eroare la parsarea rezultatului:', parseError);
-        logger && logger.info('Se va folosi un rezultat fictiv pentru demonstrație');
+        const jsonOutput = stdout.trim();
+        detectionResult = JSON.parse(jsonOutput);
+        logger && logger.info('Rezultat parsare JSON reușit');
         
-        detectionResult = {
-          fileName: mediaFile.name,
-          fake_score: isImage ? 65.3 : 72.8,
-          confidence_score: 85.2,
-          is_deepfake: true,
-          processing_time: execDuration / 1000,
-          note: "Rezultat fictiv din cauza unei erori de execuție"
-        };
+        if (detectionResult.error && detectionResult.model_missing) {
+          logger && logger.error('Modelul nu a fost găsit:', detectionResult.error);
+          return res.status(500).json({ 
+            error: detectionResult.error,
+            model_missing: true
+          });
+        }
+      } catch (parseError) {
+        logger && logger.error(`Eroare la parsarea rezultatului JSON: ${parseError}`);
+        logger && logger.error(`Răspuns stdout original: ${stdout}`);
+        throw parseError;
       }
     } catch (execError) {
       logger && logger.error('Eroare la execuția scriptului:', execError);
       logger && logger.error('Cod eroare:', execError.code);
       logger && logger.error('Stderr:', execError.stderr);
-      
-      detectionResult = {
-        fileName: mediaFile.name,
-        fake_score: isImage ? 58.7 : 67.2,
-        confidence_score: 78.5,
-        is_deepfake: isImage ? false : true,
-        processing_time: 1.2,
-        note: "Rezultat fictiv din cauza unei erori de execuție" 
-      };
+      return res.status(500).json({ 
+        error: 'Eroare la execuția analizei. Contactați administratorul sistemului.',
+        technical_details: execError.message
+      });
     }
 
     if (detectionResult.error) {
       logger && logger.error('Eroare în rezultatul detector:', detectionResult.error);
-      throw new Error(detectionResult.error);
+      return res.status(500).json({ error: detectionResult.error });
     }
+
+    detectionResult.fileName = originalFileName;
 
     logger && logger.info(`Rezultat analiză: Fake Score=${detectionResult.fake_score}%, Confidence=${detectionResult.confidence_score}%, IsDeepfake=${detectionResult.is_deepfake}`);
 
@@ -132,7 +126,7 @@ router.post('/upload', async (req, res) => {
       const sql = `INSERT INTO reports (file_name, detection_result, confidence_score, fake_score, user_id, uploaded_at) 
                  VALUES (?, ?, ?, ?, ?, NOW())`;
       await db.execute(sql, [
-        mediaFile.name,
+        originalFileName,
         JSON.stringify(detectionResult), 
         detectionResult.confidence_score || null,  
         detectionResult.fake_score || null,
@@ -140,23 +134,25 @@ router.post('/upload', async (req, res) => {
       ]);
       logger && logger.info('Rezultatul a fost salvat în baza de date.');
     } catch (dbError) {
-      logger && logger.error('Eroare la salvarea în baza de date:', JSON.stringify(dbError));
+      logger && logger.error(`Eroare la salvarea în baza de date: ${dbError.message}`);
+      logger && logger.error(dbError);
     }
 
     res.json({
       success: true,
       detectionResult: {
-        fileName: mediaFile.name,
+        fileName: originalFileName,
         fakeScore: detectionResult.fake_score,
         confidenceScore: detectionResult.confidence_score,
         isDeepfake: detectionResult.is_deepfake,
         processingTime: detectionResult.processing_time || 0,
-        note: detectionResult.note
+        analysisTime: detectionResult.analysis_time,
+        debugInfo: detectionResult.debug_info
       }
     });
 
   } catch (error) {
-    logger && logger.error('Eroare la scanarea fișierului:', JSON.stringify(error));
+    logger && logger.error(`Eroare la scanarea fișierului: ${error.message}`);
     logger && logger.error('Stack trace:', error.stack);
     res.status(500).json({ error: `A apărut o eroare la scanarea fișierului: ${error.message}` });
 
@@ -164,7 +160,7 @@ router.post('/upload', async (req, res) => {
     if (fs.existsSync(uploadPath)) {
       fs.unlink(uploadPath, (err) => {
         if (err) {
-          logger && logger.error('Eroare la ștergerea fișierului încărcat:', JSON.stringify(err));
+          logger && logger.error(`Eroare la ștergerea fișierului încărcat: ${err.message}`);
         } else {
           logger && logger.info('Fișierul a fost șters cu succes.');
         }
@@ -180,10 +176,11 @@ router.post('/uploadImage', async (req, res) => {
   }
 
   const imageFile = req.files.image;
-  const uploadPath = path.join(__dirname, '/../uploads/', imageFile.name);
+  const safeFileName = generateSafeFileName(imageFile.name);
+  const uploadPath = path.join(uploadsDir, safeFileName);
   const userId = req.body.userId || null;
 
-  logger && logger.info(`Imagine primită: ${imageFile.name}, dimensiune: ${imageFile.size} bytes, tip: ${imageFile.mimetype}, de la utilizatorul: ${userId}`);
+  logger && logger.info(`Imagine primită: ${imageFile.name} (salvat ca ${safeFileName}), dimensiune: ${imageFile.size} bytes, tip: ${imageFile.mimetype}, de la utilizatorul: ${userId}`);
 
   try {
     await imageFile.mv(uploadPath);
@@ -197,22 +194,95 @@ router.post('/uploadImage', async (req, res) => {
       });
     }
 
-    const job = await mediaProcessingQueue.add({
-      filePath: uploadPath,
-      userId: userId,
-      fileName: imageFile.name
-    });
+    logger && logger.info('Rulează detectorul deepfake...');
+    const filePath = path.normalize(uploadPath);
+    const detectorScript = path.normalize(path.join(__dirname, '/../deepfakeDetector/deepfakeDetector.py'));
+    const command = `python "${detectorScript}" "${filePath}"`;
+    
+    logger && logger.info(`Comandă execuție: ${command}`);
+    
+    let detectionResult;
+    
+    try {
+      const execStart = Date.now();
+      const { stdout, stderr } = await execPromise(command, { timeout: 120000 });
+      const execDuration = Date.now() - execStart;
+      logger && logger.info(`Analiză executată în ${execDuration}ms`);
+
+      try {
+        const jsonOutput = stdout.trim();
+        detectionResult = JSON.parse(jsonOutput);
+        logger && logger.info('Rezultat parsare JSON reușit');
+        
+        if (detectionResult.error && detectionResult.model_missing) {
+          logger && logger.error('Modelul nu a fost găsit:', detectionResult.error);
+          return res.status(500).json({ 
+            error: detectionResult.error,
+            model_missing: true
+          });
+        }
+      } catch (parseError) {
+        logger && logger.error(`Eroare la parsarea rezultatului JSON: ${parseError}`);
+        logger && logger.error(`Răspuns stdout original: ${stdout}`);
+        throw parseError;
+      }
+    } catch (error) {
+      logger && logger.error(`Eroare la procesarea imaginii: ${error.message}`);
+      return res.status(500).json({ 
+        error: 'Eroare la procesarea imaginii. Contactați administratorul sistemului.',
+        technical_details: error.message
+      });
+    }
+
+    if (detectionResult.error) {
+      logger && logger.error('Eroare în rezultatul detector:', detectionResult.error);
+      return res.status(500).json({ error: detectionResult.error });
+    }
+
+    detectionResult.fileName = imageFile.name;
+
+    try {
+      const sql = `INSERT INTO reports (file_name, detection_result, confidence_score, fake_score, user_id, uploaded_at) 
+                 VALUES (?, ?, ?, ?, ?, NOW())`;
+      await db.execute(sql, [
+        imageFile.name,
+        JSON.stringify(detectionResult), 
+        detectionResult.confidence_score || null,  
+        detectionResult.fake_score || null,
+        userId
+      ]);
+      logger && logger.info('Rezultatul a fost salvat în baza de date.');
+    } catch (dbError) {
+      logger && logger.error(`Eroare la salvarea în baza de date: ${dbError.message}`);
+      logger && logger.error(dbError);
+    }
 
     res.json({
       success: true,
-      jobId: job.id,
-      message: 'Imaginea a fost pusă în coadă pentru procesare.',
-      estimatedTime: '5-10 secunde'
+      detectionResult: {
+        fileName: imageFile.name,
+        fakeScore: detectionResult.fake_score,
+        confidenceScore: detectionResult.confidence_score,
+        isDeepfake: detectionResult.is_deepfake,
+        processingTime: detectionResult.processing_time || 0,
+        analysisTime: detectionResult.analysis_time,
+        debugInfo: detectionResult.debug_info
+      }
     });
 
   } catch (error) {
-    logger && logger.error('Eroare la mutarea imaginii:', JSON.stringify(error));
-    res.status(500).json({ error: `A apărut o eroare la mutarea imaginii: ${error.message}` });
+    logger && logger.error(`Eroare la procesarea imaginii: ${error.message}`);
+    res.status(500).json({ error: `A apărut o eroare la procesarea imaginii: ${error.message}` });
+  } finally {
+    if (fs.existsSync(uploadPath)) {
+      fs.unlink(uploadPath, (err) => {
+        if (err) {
+          logger && logger.error(`Eroare la ștergerea fișierului încărcat: ${err.message}`);
+        } else {
+          logger && logger.info('Fișierul a fost șters cu succes.');
+        }
+      });
+    }
   }
 });
 
@@ -220,22 +290,7 @@ router.get('/job/:id', async (req, res) => {
   const jobId = req.params.id;
   
   try {
-    const randomScore = Math.floor(Math.random() * 100);
-    const isDeepfake = randomScore > 50;
-
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    res.json({
-      id: jobId,
-      state: 'completed',
-      result: {
-        fileName: "image.jpg",
-        fake_score: randomScore,
-        confidence_score: 85.5,
-        is_deepfake: isDeepfake,
-        processing_time: 1.2
-      }
-    });
+    res.status(404).json({ error: "Funcționalitatea de analiză asincronă nu este disponibilă momentan." });
   } catch (error) {
     res.status(500).json({ error: `Eroare la obținerea statusului job-ului: ${error.message}` });
   }
