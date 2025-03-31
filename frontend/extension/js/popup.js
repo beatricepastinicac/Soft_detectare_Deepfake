@@ -143,9 +143,9 @@ document.addEventListener("DOMContentLoaded", function() {
         resultContainer.classList.remove("hidden");
     }
     
-    function showNotification(message) {
-        const notification = document.createElement("div");
-        notification.className = "notification";
+    function showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
         notification.textContent = message;
         document.body.appendChild(notification);
         

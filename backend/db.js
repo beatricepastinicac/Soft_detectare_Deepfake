@@ -1,16 +1,15 @@
 const mysql = require('mysql2');
 
-
 const pool = mysql.createPool({
   host: 'localhost',
   user: 'root',
   password: '',  
   database: 'deepfakedetection',  
   port: 3306,
+  connectionLimit: 10, // Limitează numărul de conexiuni
 });
 
 const promisePool = pool.promise();
-
 
 promisePool.getConnection((err, connection) => {
   if (err) {

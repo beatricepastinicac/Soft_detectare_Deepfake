@@ -40,6 +40,18 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 });
 
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.action === "scanImage") {
+    fetch(message.imageUrl)
+      .then(response => response.blob())
+      .then(blob => {
+      })
+      .catch(error => {
+        console.error("Eroare la scanarea imaginii:", error);
+      });
+  }
+});
+
 chrome.notifications.onClicked.addListener((notificationId) => {
   chrome.tabs.create({
     url: chrome.runtime.getURL('report.html')

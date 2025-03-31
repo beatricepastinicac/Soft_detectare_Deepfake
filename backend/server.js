@@ -1,3 +1,5 @@
+process.env.TF_ENABLE_ONEDNN_OPTS = '0';
+
 const express = require('express');
 const fileUpload = require('express-fileupload');
 const cors = require('cors');
@@ -69,12 +71,24 @@ app.use(cors({ origin: 'http://localhost:3000' }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(fileUpload());
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 const uploadsDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
+
+const publicDir = path.join(__dirname, 'public');
+if (!fs.existsSync(publicDir)) {
+  fs.mkdirSync(publicDir, { recursive: true });
+}
+
+const heatmapsDir = path.join(publicDir, 'heatmaps');
+if (!fs.existsSync(heatmapsDir)) {
+  fs.mkdirSync(heatmapsDir, { recursive: true });
+}
+
+app.use('/uploads', express.static(uploadsDir));
+app.use(express.static(publicDir));
 
 db.getConnection((err, connection) => {
   if (err) {

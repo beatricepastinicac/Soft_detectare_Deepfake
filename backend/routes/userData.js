@@ -111,19 +111,16 @@ router.put('/profile/:userId', async (req, res) => {
 
 router.get('/analyses', authenticateToken, async (req, res) => {
   try {
-    logger && logger.info(`Cerere analize pentru user ID: ${req.user.userId}`);
-    
     const [analyses] = await db.execute(`
-      SELECT * FROM reports 
+      SELECT id, file_name, fake_score, uploaded_at 
+      FROM reports 
       WHERE user_id = ? 
       ORDER BY uploaded_at DESC
     `, [req.user.userId]);
-    
-    logger && logger.info(`S-au găsit ${analyses.length} analize pentru utilizatorul ${req.user.userId}`);
     res.status(200).json(analyses);
   } catch (error) {
-    logger && logger.error(`Eroare la obținerea analizelor pentru userId=${req.user.userId}:`, error);
-    res.status(500).json({ message: 'Eroare la obținerea analizelor', error: error.message });
+    logger.error('Eroare la obținerea istoricului scanărilor:', error);
+    res.status(500).json({ message: 'Eroare la obținerea istoricului scanărilor' });
   }
 });
 

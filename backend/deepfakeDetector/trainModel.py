@@ -14,6 +14,14 @@ Xception = tf.keras.applications.Xception
 layers = tf.keras.layers
 models = tf.keras.models
 
+gpus = tf.config.experimental.list_physical_devices('GPU')
+if gpus:
+    try:
+        for gpu in gpus:
+            tf.config.experimental.set_memory_growth(gpu, True)
+    except RuntimeError as e:
+        print(f"Eroare la configurarea GPU: {e}")
+
 def extract_frames_from_video(video_path, output_folder, num_frames=10):
     cap = cv2.VideoCapture(video_path)
     if not cap.isOpened():
@@ -223,19 +231,24 @@ def prepare_dataset(data_dir):
     return total_images
 
 def create_model():
-    base_model = Xception(weights="imagenet", include_top=False, input_shape=(224, 224, 3))
-    base_model.trainable = False  
-    model = models.Sequential([
+    # Utilizare EfficientNetV2 pentru performanță mai bună
+    base_model = tf.keras.applications.EfficientNetV2B0(
+        weights="imagenet", include_top=False, input_shape=(224, 224, 3)
+    )
+    base_model.trainable = False  # Congelare straturi de bază
+
+    model = tf.keras.Sequential([
         base_model,
-        layers.GlobalAveragePooling2D(),
-        layers.Dense(256, activation='relu'),
-        layers.BatchNormalization(),
-        layers.Dropout(0.5),
-        layers.Dense(1, activation='sigmoid')
+        tf.keras.layers.GlobalAveragePooling2D(),
+        tf.keras.layers.Dense(512, activation='relu'),
+        tf.keras.layers.BatchNormalization(),
+        tf.keras.layers.Dropout(0.5),
+        tf.keras.layers.Dense(1, activation='sigmoid')  # Clasificare binară
     ])
-    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.0001), 
-                  loss='binary_crossentropy', 
-                  metrics=['accuracy'])
+
+    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.00001),
+                  loss='binary_crossentropy',
+                  metrics=['accuracy', tf.keras.metrics.AUC()])
     return model
 
 def train_model(data_dir, model_save_path, batch_size=32):
