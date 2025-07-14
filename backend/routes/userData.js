@@ -112,8 +112,7 @@ router.put('/profile/:userId', async (req, res) => {
 router.get('/analyses', authenticateToken, async (req, res) => {
   try {
     const [analyses] = await db.execute(`
-      SELECT id, file_name, fake_score, uploaded_at 
-      FROM reports 
+      SELECT * FROM reports 
       WHERE user_id = ? 
       ORDER BY uploaded_at DESC
     `, [req.user.userId]);
@@ -218,6 +217,31 @@ router.delete('/:userId/analyses/:analysisId', authenticateToken, async (req, re
   } catch (error) {
     logger && logger.error(`Eroare la ștergerea analizei: userId=${userId}, analysisId=${analysisId}`, error);
     res.status(500).json({ message: 'Eroare la ștergerea analizei', error: error.message });
+  }
+});
+
+router.post('/log-extension-download', authenticateToken, async (req, res) => {
+  try {
+    const { userId, browserType } = req.body;
+    const actualUserId = req.user.userId;
+    
+    // Verifică că utilizatorul încearcă să își logheze propria activitate
+    if (parseInt(userId) !== actualUserId) {
+      return res.status(403).json({ message: 'Nu poți loga activitatea altui utilizator' });
+    }
+
+    // Log descărcarea
+    await db.execute(`
+      INSERT INTO extension_downloads (user_id, browser_type, downloaded_at, ip_address)
+      VALUES (?, ?, NOW(), ?)
+    `, [actualUserId, browserType, req.ip]);
+
+    logger && logger.info(`Extension download logged for user ${actualUserId}, browser: ${browserType}`);
+    res.status(200).json({ message: 'Descărcarea a fost înregistrată cu succes' });
+
+  } catch (error) {
+    logger && logger.error(`Eroare la înregistrarea descărcării extensiei:`, error);
+    res.status(500).json({ message: 'Eroare la înregistrarea descărcării', error: error.message });
   }
 });
 

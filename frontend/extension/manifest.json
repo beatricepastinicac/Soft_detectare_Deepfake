@@ -1,22 +1,104 @@
 {
   "manifest_version": 3,
-  "name": "Detectare Deepfake",
-  "description": "Extensie pentru detectarea conținutului deepfake în pagini web.",
-  "version": "1.0",
-  "action": {
-    "default_popup": "popup.html",
-    "default_icon": "images/icon.png"
-  },
+  "name": "BeeDetection Pro - AI Deepfake Detector",
+  "version": "2.0.0",
+  "description": "Advanced AI-powered deepfake detection with Grad-CAM analysis and premium features",
   "permissions": [
-    "tabs",
     "activeTab",
+    "contextMenus",
+    "notifications",
     "storage",
-    "scripting"
+    "scripting",
+    "tabs"
+  ],
+  "host_permissions": [
+    "http://localhost:5000/*",
+    "https://facebook.com/*",
+    "https://*.facebook.com/*",
+    "https://instagram.com/*",
+    "https://*.instagram.com/*",
+    "https://twitter.com/*",
+    "https://*.twitter.com/*",
+    "https://x.com/*",
+    "https://*.x.com/*",
+    "https://tiktok.com/*",
+    "https://*.tiktok.com/*",
+    "https://youtube.com/*",
+    "https://*.youtube.com/*",
+    "https://*/*"
   ],
   "background": {
     "service_worker": "js/background.js"
   },
-  "host_permissions": [
-    "<all_urls>"
-  ]
+  "content_scripts": [
+    {
+      "matches": [ "https://facebook.com/*", "https://*.facebook.com/*" ],
+      "js": [ "js/content.js", "js/platforms/facebook.js" ],
+      "css": [ "css/content.css" ],
+      "run_at": "document_end"
+    },
+    {
+      "matches": [ "https://instagram.com/*", "https://*.instagram.com/*" ],
+      "js": [ "js/content.js", "js/platforms/instagram.js" ],
+      "css": [ "css/content.css" ],
+      "run_at": "document_end"
+    },
+    {
+      "matches": [ 
+        "https://twitter.com/*", 
+        "https://*.twitter.com/*", 
+        "https://x.com/*", 
+        "https://*.x.com/*" 
+      ],
+      "js": [ "js/content.js", "js/content-universal.js" ],
+      "css": [ "css/content.css" ],
+      "run_at": "document_end"
+    },
+    {
+      "matches": [ "https://tiktok.com/*", "https://*.tiktok.com/*" ],
+      "js": [ "js/content.js" ],
+      "css": [ "css/content.css" ],
+      "run_at": "document_end"
+    },
+    {
+      "matches": [ "https://youtube.com/*", "https://*.youtube.com/*" ],
+      "js": [ "js/content.js" ],
+      "css": [ "css/content.css" ],
+      "run_at": "document_end"
+    },
+    {
+      "matches": [ "<all_urls>" ],
+      "js": [ "js/content.js" ],
+      "css": [ "css/content.css" ],
+      "run_at": "document_end"
+    },
+    {
+      "matches": [ "http://localhost:5000/*" ],
+      "js": [ "js/auth-bridge.js" ],
+      "run_at": "document_end"
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "BeeDetection Pro - Detect Deepfakes",
+    "default_icon": {
+      "16": "images/icon.png",
+      "32": "images/icon.png",
+      "48": "images/icon.png",
+      "128": "images/icon.png"
+    }
+  },
+  "icons": {
+    "16": "images/icon.png",
+    "32": "images/icon.png",
+    "48": "images/icon.png",
+    "128": "images/icon.png"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [ "images/*", "css/*", "js/*" ],
+      "matches": [ "<all_urls>" ]
+    }
+  ],
+  "options_page": "options.html"
 }

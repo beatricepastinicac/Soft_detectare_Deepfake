@@ -1,0 +1,74 @@
+{
+  "name": "bee-detection-pro-extension",
+  "version": "2.0.0",
+  "description": "Premium Chrome extension for AI-powered deepfake detection with Grad-CAM analysis",
+  "main": "js/background.js",
+  "scripts": {
+    "build": "node build.js",
+    "watch": "node build.js --watch",
+    "test": "jest",
+    "lint": "eslint js/**/*.js",
+    "format": "prettier --write js/**/*.js css/**/*.css *.html",
+    "zip": "node zip-extension.js",
+    "clean": "rm -rf dist/",
+    "dev": "npm run clean && npm run build && npm run watch",
+    "package": "npm run build && npm run zip",
+    "validate": "web-ext lint",
+    "start": "web-ext run"
+  },
+  "keywords": [
+    "deepfake",
+    "detection",
+    "chrome-extension",
+    "ai",
+    "security",
+    "grad-cam",
+    "premium",
+    "tensorflow"
+  ],
+  "author": "BeeDetection Pro Team",
+  "license": "MIT",
+  "devDependencies": {
+    "archiver": "^5.3.1",
+    "chokidar": "^3.5.3",
+    "eslint": "^8.45.0",
+    "fs-extra": "^11.1.1",
+    "jest": "^29.6.2",
+    "prettier": "^3.0.0",
+    "terser": "^5.19.2"
+  },
+  "dependencies": {
+    "crypto-js": "^4.1.1"
+  },
+  "jest": {
+    "testEnvironment": "jsdom",
+    "setupFilesAfterEnv": ["<rootDir>/tests/setup.js"]
+  },
+  "eslintConfig": {
+    "env": {
+      "browser": true,
+      "es6": true,
+      "webextensions": true
+    },
+    "extends": "eslint:recommended",
+    "parserOptions": {
+      "ecmaVersion": 2022,
+      "sourceType": "module"
+    },
+    "globals": {
+      "chrome": "readonly"
+    },
+    "rules": {
+      "no-console": "warn",
+      "no-unused-vars": "error",
+      "prefer-const": "error"
+    }
+  },
+  "prettier": {
+    "tabWidth": 2,
+    "useTabs": false,
+    "semi": true,
+    "singleQuote": true,
+    "trailingComma": "es5"
+  }
+}

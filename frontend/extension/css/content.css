@@ -1,0 +1,156 @@
+.deepfake-overlay {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 9999 !important;
+    pointer-events: none !important;
+    transition: opacity 0.3s ease !important;
+}
+
+.deepfake-scan-container {
+    position: absolute !important;
+    top: 8px !important;
+    right: 8px !important;
+    z-index: 10000 !important;
+}
+
+.deepfake-scan-button {
+    background: rgba(26, 115, 232, 0.9) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 4px !important;
+    padding: 6px 10px !important;
+    font-size: 12px !important;
+    cursor: pointer !important;
+    font-family: Arial, sans-serif !important;
+    display: flex !important;
+    align-items: center !important;
+    font-weight: 500 !important;
+    transition: background-color 0.2s !important;
+}
+
+.deepfake-scan-button:hover {
+    background: rgba(26, 115, 232, 1) !important;
+}
+
+.deepfake-result-badge {
+    background: rgba(0, 0, 0, 0.8) !important;
+    color: white !important;
+    padding: 8px 16px !important;
+    border-radius: 4px !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    font-family: Arial, sans-serif !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+}
+
+.deepfake-result-badge.fake {
+    background: rgba(219, 68, 55, 0.95) !important;
+}
+
+.deepfake-result-badge.suspicious {
+    background: rgba(244, 180, 0, 0.95) !important;
+}
+
+.deepfake-result-badge.authentic {
+    background: rgba(15, 157, 88, 0.9) !important;
+}
+
+.deepfake-result-badge.processing {
+    background: rgba(26, 115, 232, 0.9) !important;
+}
+
+.deepfake-spinner {
+    width: 12px !important;
+    height: 12px !important;
+    border: 2px solid rgba(255,255,255,0.3) !important;
+    border-top-color: white !important;
+    border-radius: 50% !important;
+    animation: deepfake-spin 1s linear infinite !important;
+}
+
+@keyframes deepfake-spin {
+    to { transform: rotate(360deg); }
+}
+
+.deepfake-notification {
+    position: fixed !important;
+    top: 20px !important;
+    right: 20px !important;
+    padding: 12px 16px !important;
+    border-radius: 8px !important;
+    z-index: 10001 !important;
+    font-family: Arial, sans-serif !important;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1) !important;
+    font-size: 14px !important;
+    max-width: 300px !important;
+    transition: opacity 0.3s ease !important;
+}
+
+.deepfake-notification.info {
+    background: #1a73e8 !important;
+    color: white !important;
+}
+
+.deepfake-notification.success {
+    background: #0f9d58 !important;
+    color: white !important;
+}
+
+.deepfake-notification.error {
+    background: #db4437 !important;
+    color: white !important;
+}
+
+.deepfake-notification.warning {
+    background: #f4b400 !important;
+    color: white !important;
+}
+
+.deepfake-auth-notification {
+    position: fixed !important;
+    top: 20px !important;
+    right: 20px !important;
+    background: #1a73e8 !important;
+    color: white !important;
+    padding: 15px 20px !important;
+    border-radius: 8px !important;
+    z-index: 10001 !important;
+    font-family: Arial, sans-serif !important;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1) !important;
+    font-size: 14px !important;
+    max-width: 320px !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+}
+
+.deepfake-auth-notification:hover {
+    background: #1669d6 !important;
+    transform: translateY(-1px) !important;
+}
+
+[data-deepfake-scanned="processing"] {
+    filter: brightness(0.9) !important;
+}
+
+[data-deepfake-status="fake"] {
+    outline: 2px solid #db4437 !important;
+    outline-offset: -2px !important;
+}
+
+[data-deepfake-status="suspicious"] {
+    outline: 2px solid #f4b400 !important;
+    outline-offset: -2px !important;
+}
+
+[data-deepfake-status="authentic"] {
+    outline: 1px solid #0f9d58 !important;
+    outline-offset: -1px !important;
+}

@@ -231,11 +231,10 @@ def prepare_dataset(data_dir):
     return total_images
 
 def create_model():
-    # Utilizare EfficientNetV2 pentru performanță mai bună
     base_model = tf.keras.applications.EfficientNetV2B0(
         weights="imagenet", include_top=False, input_shape=(224, 224, 3)
     )
-    base_model.trainable = False  # Congelare straturi de bază
+    base_model.trainable = False  
 
     model = tf.keras.Sequential([
         base_model,
@@ -243,7 +242,7 @@ def create_model():
         tf.keras.layers.Dense(512, activation='relu'),
         tf.keras.layers.BatchNormalization(),
         tf.keras.layers.Dropout(0.5),
-        tf.keras.layers.Dense(1, activation='sigmoid')  # Clasificare binară
+        tf.keras.layers.Dense(1, activation='sigmoid')  
     ])
 
     model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.00001),

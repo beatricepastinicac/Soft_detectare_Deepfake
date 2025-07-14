@@ -3,7 +3,7 @@ const db = require('../db');
 const adminModel = {
   getDashboardData: async () => {
     try {
-      const [stats] = await db.execute('SELECT * FROM statistics');
+      const [stats] = await db.execute('SELECT * FROM statistics WHERE id = 1');
       const [usersCount] = await db.execute('SELECT COUNT(*) as count FROM users');
       const [reportsCount] = await db.execute('SELECT COUNT(*) as count FROM reports');
       const [unreadContactsCount] = await db.execute('SELECT COUNT(*) as count FROM contacts WHERE is_read = 0');
@@ -39,13 +39,14 @@ const adminModel = {
 
   cleanOldReports: async (days = 30) => {
     try {
-      await db.execute('CALL delete_old_guest_reports(?)', [days]);
+      const [result] = await db.execute('DELETE FROM reports WHERE user_id IS NULL AND uploaded_at < DATE_SUB(NOW(), INTERVAL ? DAY)', [days]);
       const [count] = await db.execute('SELECT COUNT(*) as count FROM reports WHERE user_id IS NULL');
       
       return {
         success: true,
+        deletedCount: result.affectedRows,
         remainingReports: count[0].count,
-        message: `Rapoartele vechi (> ${days} zile) au fost șterse cu succes`
+        message: `${result.affectedRows} rapoarte vechi (> ${days} zile) au fost șterse cu succes`
       };
     } catch (error) {
       console.error('Eroare la ștergerea rapoartelor vechi:', error);
@@ -87,6 +88,61 @@ const adminModel = {
     } catch (error) {
       console.error('Eroare la analiza tabelelor:', error);
       throw new Error('Eroare la analiza tabelelor');
+    }
+  },
+
+  getSystemStats: async () => {
+    try {
+      const [dailyAnalyses] = await db.execute(`
+        SELECT DATE(uploaded_at) as date, COUNT(*) as count 
+        FROM reports 
+        WHERE uploaded_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+        GROUP BY DATE(uploaded_at)
+        ORDER BY date DESC
+      `);
+      
+      const [topUsers] = await db.execute(`
+        SELECT u.username, COUNT(r.id) as analyses_count
+        FROM users u
+        LEFT JOIN reports r ON u.id = r.user_id
+        GROUP BY u.id, u.username
+        ORDER BY analyses_count DESC
+        LIMIT 10
+      `);
+      
+      const [fakeVsReal] = await db.execute(`
+        SELECT 
+          SUM(CASE WHEN fake_score > 50 THEN 1 ELSE 0 END) as fake_count,
+          SUM(CASE WHEN fake_score <= 50 THEN 1 ELSE 0 END) as real_count
+        FROM reports
+      `);
+      
+      return {
+        dailyAnalyses,
+        topUsers,
+        fakeVsReal: fakeVsReal[0]
+      };
+    } catch (error) {
+      console.error('Eroare la obținerea statisticilor de sistem:', error);
+      throw new Error('Eroare la obținerea statisticilor de sistem');
+    }
+  },
+
+  getUsersWithMostAnalyses: async (limit = 10) => {
+    try {
+      const [rows] = await db.execute(`
+        SELECT u.id, u.username, u.email, u.tier, COUNT(r.id) as total_analyses,
+               AVG(r.fake_score) as avg_fake_score, MAX(r.uploaded_at) as last_analysis
+        FROM users u
+        LEFT JOIN reports r ON u.id = r.user_id
+        GROUP BY u.id, u.username, u.email, u.tier
+        ORDER BY total_analyses DESC
+        LIMIT ?
+      `, [limit]);
+      return rows;
+    } catch (error) {
+      console.error('Eroare la obținerea utilizatorilor cu cele mai multe analize:', error);
+      throw new Error('Eroare la obținerea utilizatorilor cu cele mai multe analize');
     }
   }
 };

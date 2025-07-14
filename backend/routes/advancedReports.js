@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const advancedReportModel = require('../models/advancedReportModel');
+const db = require('../db');
 const path = require('path');
 const fs = require('fs');
 const { promisify } = require('util');

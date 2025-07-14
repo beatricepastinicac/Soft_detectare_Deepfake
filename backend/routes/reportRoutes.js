@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
+const { authenticateToken } = require('../middleware/authMiddleware');
 
 let logger;
 
@@ -23,10 +24,11 @@ router.post('/report', async (req, res) => {
     }
 
     const sql = `
-      INSERT INTO reports (file_name, detection_result, confidence_score, fake_score, user_id, file_path, uploaded_at) 
+      INSERT INTO reports (file_name, detection_result, confidence_score, fake_score, user_id, image_path, uploaded_at) 
       VALUES (?, ?, ?, ?, ?, ?, NOW())
     `;
-    const result = await db.promise().execute(sql, [
+    
+    const [result] = await db.execute(sql, [
       fileName, 
       JSON.stringify(detectionResult), 
       confidenceScore, 
@@ -35,11 +37,11 @@ router.post('/report', async (req, res) => {
       filePath
     ]);
     
-    logger && logger.info(`Raport creat cu succes: ID=${result[0].insertId}`);
-    res.status(201).json({ message: 'Raportul a fost salvat cu succes' });
+    logger && logger.info(`Raport creat cu succes: ID=${result.insertId}`);
+    res.status(201).json({ message: 'Raportul a fost salvat cu succes', reportId: result.insertId });
   } catch (error) {
     logger && logger.error('Eroare la salvarea raportului:', error);
-    res.status(500).json({ message: 'A apărut o eroare la salvarea raportului.', error });
+    res.status(500).json({ message: 'A apărut o eroare la salvarea raportului.', error: error.message });
   }
 });
 
@@ -47,18 +49,13 @@ router.get('/reports', async (req, res) => {
   logger && logger.info('Cerere pentru obținerea tuturor rapoartelor');
 
   try {
-    const [rows] = await db.promise().execute('SELECT * FROM reports');
-    
-    if (rows.length === 0) {
-      logger && logger.info('Nu s-au găsit rapoarte');
-      return res.status(404).json({ message: 'Nu s-au găsit rapoarte.' });
-    }
+    const [rows] = await db.execute('SELECT * FROM reports ORDER BY uploaded_at DESC');
     
     logger && logger.info(`S-au găsit ${rows.length} rapoarte`);
     res.status(200).json(rows);
   } catch (error) {
     logger && logger.error('Eroare la obținerea rapoartelor:', error);
-    res.status(500).json({ message: 'A apărut o eroare la obținerea rapoartelor.', error });
+    res.status(500).json({ message: 'A apărut o eroare la obținerea rapoartelor.', error: error.message });
   }
 });
 
@@ -68,18 +65,50 @@ router.get('/reports/user/:userId', async (req, res) => {
   logger && logger.info(`Cerere pentru obținerea rapoartelor utilizatorului: userId=${userId}`);
 
   try {
-    const [rows] = await db.promise().execute('SELECT * FROM reports WHERE user_id = ?', [userId]);
-    
-    if (rows.length === 0) {
-      logger && logger.info(`Nu s-au găsit rapoarte pentru utilizatorul ${userId}`);
-      return res.status(404).json({ message: 'Nu s-au găsit rapoarte pentru acest utilizator.' });
-    }
+    const [rows] = await db.execute('SELECT * FROM reports WHERE user_id = ? ORDER BY uploaded_at DESC', [userId]);
     
     logger && logger.info(`S-au găsit ${rows.length} rapoarte pentru utilizatorul ${userId}`);
     res.status(200).json(rows);
   } catch (error) {
     logger && logger.error(`Eroare la obținerea rapoartelor pentru user_id ${userId}:`, error);
-    res.status(500).json({ message: 'A apărut o eroare la obținerea rapoartelor pentru utilizator.', error });
+    res.status(500).json({ message: 'A apărut o eroare la obținerea rapoartelor pentru utilizator.', error: error.message });
+  }
+});
+
+// Adaugă această rută pentru istoricul utilizatorului
+router.get('/history', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    
+    const [reports] = await db.execute(`
+      SELECT 
+        id,
+        file_name,
+        fake_score,
+        confidence_score,
+        uploaded_at,
+        image_path,
+        heatmap_path,
+        is_deepfake,
+        model_type,
+        processing_time
+      FROM reports 
+      WHERE user_id = ? 
+      ORDER BY uploaded_at DESC 
+      LIMIT 50
+    `, [userId]);
+    
+    res.json({
+      success: true,
+      reports: reports
+    });
+    
+  } catch (error) {
+    logger && logger.error(`Error fetching user history: ${error.message}`);
+    res.status(500).json({
+      error: 'Database Error',
+      message: 'Nu s-a putut încărca istoricul'
+    });
   }
 });
 

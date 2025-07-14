@@ -1,0 +1,10 @@
+RAPORT CALITATE DATE
+Data: 2025-06-01 10:50:51
+Director analizat: C:\Users\pasti\OneDrive\Desktop\licenta\aplicatie licenta\backend\deepfakeDetector\dataSet
+
+SUMAR:
+- Total estimat imagini Real: 25319
+- Total estimat imagini Fake: 44201
+
+RECOMANDARI:
+- Model stuck la 50% accuracy: Verifica etichetele datelor, foloseste o arhitectura mai complexa sau date de calitate mai buna.

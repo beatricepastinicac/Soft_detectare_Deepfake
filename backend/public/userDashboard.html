@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BeeDetection Pro - Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+
+        .logout-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .main-content {
+            padding: 30px 0;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+
+        .stat-icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            background: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .tab:hover {
+            transform: translateY(-2px);
+        }
+
+        .tab-content {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .extension-activity {
+            margin-bottom: 30px;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background 0.3s;
+        }
+
+        .activity-item:hover {
+            background: #f8f9fa;
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .activity-icon.scan {
+            background: #e3f2fd;
+            color: #2196f3;
+        }
+
+        .activity-icon.threat {
+            background: #ffebee;
+            color: #f44336;
+        }
+
+        .activity-icon.safe {
+            background: #e8f5e8;
+            color: #4caf50;
+        }
+
+        .activity-details {
+            flex: 1;
+        }
+
+        .activity-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .activity-description {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .activity-time {
+            color: #999;
+            font-size: 12px;
+        }
+
+        .premium-badge {
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            color: #333;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .spinner {
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    🐝 BeeDetection Pro
+                </div>
+                <div class="user-info">
+                    <div class="user-avatar" id="userAvatar">U</div>
+                    <div>
+                        <div id="userName">Loading...</div>
+                        <div style="font-size: 12px; opacity: 0.8;" id="userEmail">Loading...</div>
+                        <span class="premium-badge" id="premiumBadge" style="display: none;">PREMIUM</span>
+                    </div>
+                    <button class="logout-btn" onclick="handleLogout()">Logout</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="main-content">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">🔍</div>
+                    <div class="stat-number" id="totalScans">0</div>
+                    <div class="stat-label">Total Scanări</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">⚠️</div>
+                    <div class="stat-number" id="threatsDetected">0</div>
+                    <div class="stat-label">Amenințări Detectate</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-number" id="safeImages">0</div>
+                    <div class="stat-label">Imagini Sigure</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🎯</div>
+                    <div class="stat-number" id="accuracyRate">0%</div>
+                    <div class="stat-label">Rata de Acuratețe</div>
+                </div>
+            </div>
+
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('extension')">Activitate Extensie</button>
+                <button class="tab" onclick="switchTab('website')">Activitate Website</button>
+                <button class="tab" onclick="switchTab('reports')">Rapoarte</button>
+            </div>
+
+            <div id="extensionTab" class="tab-content active">
+                <h3 style="margin-bottom: 20px;">Activitate Extensie Chrome</h3>
+                <div id="extensionActivity" class="extension-activity">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        Se încarcă activitatea extensiei...
+                    </div>
+                </div>
+            </div>
+
+            <div id="websiteTab" class="tab-content">
+                <h3 style="margin-bottom: 20px;">Activitate Website</h3>
+                <div id="websiteActivity" class="extension-activity">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        Se încarcă activitatea website-ului...
+                    </div>
+                </div>
+            </div>
+
+            <div id="reportsTab" class="tab-content">
+                <h3 style="margin-bottom: 20px;">Rapoarte Generate</h3>
+                <div id="reportsActivity" class="extension-activity">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        Se încarcă rapoartele...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = window.location.origin;
+        let currentUser = null;
+        let userToken = null;
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadUserData();
+            await loadDashboardData();
+        });
+
+        async function loadUserData() {
+            try {
+                // Check localStorage first
+                const authData = localStorage.getItem('extensionAuth');
+                if (authData) {
+                    const parsed = JSON.parse(authData);
+                    currentUser = parsed.user;
+                    userToken = parsed.token;
+                    
+                    updateUserUI(parsed);
+                    return;
+                }
+
+                // Redirect to login if no auth data
+                window.location.href = '/extension-login.html';
+            } catch (error) {
+                console.error('Error loading user data:', error);
+                window.location.href = '/extension-login.html';
+            }
+        }
+
+        function updateUserUI(authData) {
+            const userName = document.getElementById('userName');
+            const userEmail = document.getElementById('userEmail');
+            const userAvatar = document.getElementById('userAvatar');
+            const premiumBadge = document.getElementById('premiumBadge');
+
+            if (authData.user) {
+                const fullName = `${authData.user.first_name || ''} ${authData.user.last_name || ''}`.trim();
+                userName.textContent = fullName || authData.email.split('@')[0];
+                userEmail.textContent = authData.email;
+                userAvatar.textContent = (authData.user.first_name || authData.email)[0].toUpperCase();
+            } else {
+                userName.textContent = authData.email.split('@')[0];
+                userEmail.textContent = authData.email;
+                userAvatar.textContent = authData.email[0].toUpperCase();
+            }
+
+            if (authData.isPremium) {
+                premiumBadge.style.display = 'inline-block';
+            }
+        }
+
+        async function loadDashboardData() {
+            try {
+                // Load stats
+                await loadStats();
+                
+                // Load activities
+                await loadExtensionActivity();
+                await loadWebsiteActivity();
+                await loadReports();
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+            }
+        }
+
+        async function loadStats() {
+            try {
+                // Mock stats for now - replace with actual API calls
+                document.getElementById('totalScans').textContent = '42';
+                document.getElementById('threatsDetected').textContent = '3';
+                document.getElementById('safeImages').textContent = '39';
+                document.getElementById('accuracyRate').textContent = '98%';
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        async function loadExtensionActivity() {
+            const container = document.getElementById('extensionActivity');
+            
+            try {
+                // Mock data for demonstration
+                const activities = [
+                    {
+                        type: 'scan',
+                        title: 'Imagine scanată pe Facebook',
+                        description: 'Scanare completă - imagine sigură detectată',
+                        time: '2 minute în urmă',
+                        platform: 'Facebook'
+                    },
+                    {
+                        type: 'threat',
+                        title: 'Deepfake detectat pe Instagram',
+                        description: 'Amenințare detectată cu 87% acuratețe',
+                        time: '15 minute în urmă',
+                        platform: 'Instagram'
+                    },
+                    {
+                        type: 'safe',
+                        title: 'Scanare automată pe Twitter',
+                        description: 'Toate imaginile scanate sunt sigure',
+                        time: '1 oră în urmă',
+                        platform: 'Twitter'
+                    }
+                ];
+
+                container.innerHTML = activities.map(activity => `
+                    <div class="activity-item">
+                        <div class="activity-icon ${activity.type}">
+                            ${activity.type === 'scan' ? '🔍' : activity.type === 'threat' ? '⚠️' : '✅'}
+                        </div>
+                        <div class="activity-details">
+                            <div class="activity-title">${activity.title}</div>
+                            <div class="activity-description">${activity.description}</div>
+                            <div class="activity-time">${activity.time} • ${activity.platform}</div>
+                        </div>
+                    </div>
+                `).join('');
+
+            } catch (error) {
+                console.error('Error loading extension activity:', error);
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🔍</div>
+                        <div>Nu există activitate înregistrată pentru extensie.</div>
+                    </div>
+                `;
+            }
+        }
+
+        async function loadWebsiteActivity() {
+            const container = document.getElementById('websiteActivity');
+            
+            container.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-state-icon">🌐</div>
+                    <div>Activitatea website-ului va fi afișată aici.</div>
+                </div>
+            `;
+        }
+
+        async function loadReports() {
+            const container = document.getElementById('reportsActivity');
+            
+            container.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-state-icon">📊</div>
+                    <div>Rapoartele generate vor fi afișate aici.</div>
+                </div>
+            `;
+        }
+
+        function switchTab(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(tabName + 'Tab').classList.add('active');
+        }
+
+        function handleLogout() {
+            localStorage.removeItem('extensionAuth');
+            window.location.href = '/extension-login.html';
+        }
+    </script>
+</body>
+</html>

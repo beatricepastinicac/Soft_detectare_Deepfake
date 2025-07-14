@@ -1,0 +1,35 @@
+{
+  "data_directory": "C:\\Users\\pasti\\OneDrive\\Desktop\\licenta\\aplicatie licenta\\backend\\deepfakeDetector\\dataSet",
+  "analysis_date": "2025-06-01 10:50:51",
+  "summary": {
+    "real_images": 17159,
+    "fake_images": 28301,
+    "real_videos": 408,
+    "fake_videos": 795,
+    "estimated_real_total": 25319,
+    "estimated_fake_total": 44201
+  },
+  "face_detection_rates": {
+    "real": {
+      "with_faces": 84,
+      "without_faces": 8,
+      "multiple_faces": 8
+    },
+    "fake": {
+      "with_faces": 92,
+      "without_faces": 7,
+      "multiple_faces": 1
+    }
+  },
+  "recommendations": [
+    {
+      "problem": "Model stuck la 50% accuracy",
+      "solution": "Verifica etichetele datelor, foloseste o arhitectura mai complexa sau date de calitate mai buna."
+    }
+  ],
+  "training_issues": [
+    "Final accuracy: 0.5013",
+    "Final val_accuracy: 0.5000",
+    "Max val_accuracy: 0.5000"
+  ]
+}

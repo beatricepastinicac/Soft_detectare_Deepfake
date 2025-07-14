@@ -10,9 +10,9 @@ router.use((req, res, next) => {
 });
 
 router.post('/', async (req, res) => {
-  const { name, email, message } = req.body;
+  const { name, email, message, source, timestamp } = req.body;
   
-  logger && logger.info(`Mesaj de contact primit de la: ${name}, email: ${email}`);
+  logger && logger.info(`Mesaj de contact primit de la: ${name}, email: ${email}, sursa: ${source || 'web'}`);
 
   try {
     if (!name || !email || !message) {
@@ -24,7 +24,10 @@ router.post('/', async (req, res) => {
     await db.execute(sql, [name, email, message]);
 
     logger && logger.info(`Mesajul de contact de la ${email} a fost salvat cu succes`);
-    res.status(201).json({ message: 'Mesajul de contact a fost trimis cu succes' });
+    res.status(201).json({ 
+      message: 'Mesajul de contact a fost trimis cu succes',
+      success: true 
+    });
   } catch (error) {
     logger && logger.error('Eroare la trimiterea mesajului de contact:', error);
     res.status(500).json({ message: 'A apărut o eroare la trimiterea mesajului de contact.', error });

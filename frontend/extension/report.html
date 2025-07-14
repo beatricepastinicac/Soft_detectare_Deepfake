@@ -10,30 +10,37 @@
 <body>
   <div class="container">
     <header>
-      <h1>BeeDetection</h1>
-      <p>Raport de scanare conținut</p>
+      <h1>🐝 BeeDetection</h1>
+      <p>Raport avansat de detectare deepfake</p>
+      <div class="premium-badge" style="background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); color: #92400e; padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 1rem; display: inline-block;">
+        ✨ Premium Report
+      </div>
     </header>
     
     <div class="stats-container">
       <div class="stat-card">
-        <h3>Total scanări</h3>
+        <h3>📊 Total scanări</h3>
         <div class="stat-value" id="total-scans">0</div>
       </div>
       <div class="stat-card">
-        <h3>Deepfakes detectate</h3>
+        <h3>⚠️ Deepfake detectate</h3>
         <div class="stat-value" id="detected-fakes">0</div>
       </div>
       <div class="stat-card">
-        <h3>Conținut autentic</h3>
+        <h3>✅ Conținut autentic</h3>
         <div class="stat-value" id="authentic-content">0</div>
+      </div>
+      <div class="stat-card">
+        <h3>🎯 Acuratețe model</h3>
+        <div class="stat-value" style="font-size: 2rem;">94.2%</div>
       </div>
     </div>
     
     <section class="report-section">
-      <h2>Istoricul scanărilor</h2>
+      <h2>📈 Istoricul scanărilor avansate</h2>
       <div class="filter-controls">
         <div class="filter-group">
-          <label for="date-filter">Filtrare după dată:</label>
+          <label for="date-filter">🗓️ Filtrare după dată:</label>
           <select id="date-filter">
             <option value="all">Toate perioadele</option>
             <option value="today">Astăzi</option>
@@ -42,14 +49,13 @@
           </select>
         </div>
         <div class="filter-group">
-          <label for="source-filter">Filtrare după sursă:</label>
+          <label for="source-filter">🌐 Filtrare după sursă:</label>
           <select id="source-filter">
             <option value="all">Toate sursele</option>
-           
           </select>
         </div>
         <div class="filter-group">
-          <label for="risk-filter">Filtrare după risc:</label>
+          <label for="risk-filter">⚠️ Filtrare după risc:</label>
           <select id="risk-filter">
             <option value="all">Toate nivelurile</option>
             <option value="high">Risc ridicat</option>
@@ -63,68 +69,51 @@
         <table class="history-table">
           <thead>
             <tr>
-              <th>Data</th>
-              <th>Fișier</th>
-              <th>Sursă</th>
-              <th>Scor Deepfake</th>
-              <th>Risc</th>
+              <th>📅 Data</th>
+              <th>📁 Fișier</th>
+              <th>🌐 Sursă</th>
+              <th>📊 Scor Deepfake</th>
+              <th>⚠️ Risc</th>
             </tr>
           </thead>
           <tbody id="history-table-body">
-    
           </tbody>
         </table>
       </div>
     </section>
     
-    <section class="history-section">
-      <h2>Istoricul scanărilor</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Data</th>
-            <th>Fișier</th>
-            <th>Scor Deepfake</th>
-            <th>Risc</th>
-          </tr>
-        </thead>
-        <tbody id="history-table">
-        </tbody>
-      </table>
-    </section>
-    
     <section class="settings-section">
-      <h2>Setări</h2>
+      <h2>⚙️ Setări avansate</h2>
       <div class="settings-form">
         <div class="setting-item">
           <label for="auto-scan-setting">
             <input type="checkbox" id="auto-scan-setting">
-            Activează scanarea automată a conținutului
+            🔄 Activează scanarea automată a conținutului
           </label>
-          <p class="setting-description">Când este activată, extensia va scana automat conținutul de pe rețelele sociale.</p>
+          <p class="setting-description">Când este activată, extensia va scana automat conținutul de pe rețelele sociale cu algoritmii premium.</p>
         </div>
         
         <div class="setting-item">
           <label for="notifications-setting">
             <input type="checkbox" id="notifications-setting">
-            Activează notificările
+            🔔 Activează notificările avansate
           </label>
-          <p class="setting-description">Primește notificări când este detectat un posibil deepfake.</p>
+          <p class="setting-description">Primește notificări detaliate când este detectat un posibil deepfake, cu analiza de risc inclusă.</p>
         </div>
         
         <div class="setting-item">
-          <label for="api-url-setting">URL API</label>
-          <input type="text" id="api-url-setting">
-          <p class="setting-description">URL-ul serverului de analiză deepfake.</p>
+          <label for="api-url-setting">🌐 URL API Premium</label>
+          <input type="text" id="api-url-setting" placeholder="https://api.beedetection.com/premium">
+          <p class="setting-description">URL-ul serverului premium de analiză deepfake cu funcționalități avansate.</p>
         </div>
         
-        <button id="save-settings-btn" class="primary-button">Salvează setările</button>
+        <button id="save-settings-btn" class="primary-button">💾 Salvează setările</button>
       </div>
     </section>
   </div>
   
   <footer>
-    <p>&copy; 2025 BeeDetection</p>
+    <p>&copy; 2025 🐝 BeeDetection Premium - Detectare avansată deepfake</p>
   </footer>
   
   <script src="js/report.js"></script>

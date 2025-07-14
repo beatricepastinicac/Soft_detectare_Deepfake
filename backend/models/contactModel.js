@@ -2,7 +2,7 @@ const db = require('../db');
 
 const createContactMessage = async (name, email, message) => {
   try {
-    const sql = `INSERT INTO contacts (name, email, message, date) VALUES (?, ?, ?, NOW())`;
+    const sql = `INSERT INTO contacts (name, email, message, created_at) VALUES (?, ?, ?, NOW())`;
     const [result] = await db.execute(sql, [name, email, message]);
     return result;
   } catch (error) {
@@ -11,10 +11,9 @@ const createContactMessage = async (name, email, message) => {
   }
 };
 
-
 const getAllContactMessages = async () => {
   try {
-    const sql = `SELECT * FROM contacts ORDER BY date DESC`;
+    const sql = `SELECT * FROM contacts ORDER BY created_at DESC`;
     const [rows] = await db.execute(sql);
     return rows;
   } catch (error) {
@@ -22,7 +21,6 @@ const getAllContactMessages = async () => {
     throw new Error('A apărut o eroare la obținerea mesajelor de contact.');
   }
 };
-
 
 const getContactMessageById = async (id) => {
   try {
@@ -38,7 +36,6 @@ const getContactMessageById = async (id) => {
   }
 };
 
-
 const deleteContactMessageById = async (id) => {
   try {
     const sql = `DELETE FROM contacts WHERE id = ?`;
@@ -52,7 +49,6 @@ const deleteContactMessageById = async (id) => {
     throw new Error('A apărut o eroare la ștergerea mesajului de contact.');
   }
 };
-
 
 module.exports = {
   createContactMessage,

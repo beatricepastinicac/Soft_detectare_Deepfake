@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BeeDetection Pro - Settings</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        h1 {
+            color: #1a73e8;
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .settings-section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            color: #333;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+
+        .setting-info {
+            flex: 1;
+        }
+
+        .setting-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .setting-description {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .setting-control {
+            margin-left: 20px;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 24px;
+            background: #ddd;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .toggle-switch.active {
+            background: #1a73e8;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .toggle-switch.active .toggle-slider {
+            transform: translateX(26px);
+        }
+
+        select, input[type="number"] {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            min-width: 120px;
+        }
+
+        .premium-feature {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .premium-badge {
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+
+        .save-button {
+            background: linear-gradient(45deg, #1a73e8, #4285f4);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: block;
+            margin: 30px auto 0;
+            transition: transform 0.2s;
+        }
+
+        .save-button:hover {
+            transform: translateY(-2px);
+        }
+
+        .status-message {
+            text-align: center;
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .status-message.success {
+            background: #e8f5e8;
+            color: #2e7d32;
+            border: 1px solid #4caf50;
+        }
+
+        .api-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px;
+            background: #f0f8ff;
+            border-radius: 6px;
+            margin-top: 16px;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #4caf50;
+            animation: pulse 2s infinite;
+        }
+
+        .status-dot.offline {
+            background: #f44336;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔍 BeeDetection Pro Settings</h1>
+            <p class="subtitle">Configure your AI-powered deepfake detection preferences</p>
+        </header>
+
+        <div class="settings-section">
+            <h2 class="section-title">🚀 Detection Settings</h2>
+            
+            <div class="setting-item">
+                <div class="setting-info">
+                    <div class="setting-title">Grad-CAM Analysis <span class="premium-badge">PREMIUM</span></div>
+                    <div class="setting-description">Use advanced AI heatmaps for detailed analysis</div>
+                </div>
+                <div class="setting-control">
+                    <div class="toggle-switch" id="gradcamToggle">
+                        <div class="toggle-slider"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-info">
+                    <div class="setting-title">Auto-scan New Images</div>
+                    <div class="setting-description">Automatically scan images as they load on pages</div>
+                </div>
+                <div class="setting-control">
+                    <div class="toggle-switch" id="autoscanToggle">
+                        <div class="toggle-slider"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-info">
+                    <div class="setting-title">Sensitivity Level</div>
+                    <div class="setting-description">Adjust detection sensitivity for different content types</div>
+                </div>
+                <div class="setting-control">
+                    <select id="sensitivityLevel">
+                        <option value="low">Low (70%+ threshold)</option>
+                        <option value="medium" selected>Medium (50%+ threshold)</option>
+                        <option value="high">High (30%+ threshold)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="settings-section">
+            <h2 class="section-title">🔔 Notifications</h2>
+            
+            <div class="setting-item">
+                <div class="setting-info">
+                    <div class="setting-title">Threat Notifications</div>
+                    <div class="setting-description">Show browser notifications when deepfakes are detected</div>
+                </div>
+                <div class="setting-control">
+                    <div class="toggle-switch active" id="notificationsToggle">
+                        <div class="toggle-slider"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-info">
+                    <div class="setting-title">Sound Alerts</div>
+                    <div class="setting-description">Play sound when high-risk content is detected</div>
+                </div>
+                <div class="setting-control">
+                    <div class="toggle-switch" id="soundToggle">
+                        <div class="toggle-slider"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="settings-section">
+            <h2 class="section-title">🌐 Platform Settings</h2>
+            
+            <div class="setting-item">
+                <div class="setting-info">
+                    <div class="setting-title">Facebook Integration</div>
+                    <div class="setting-description">Enable scanning on Facebook and Meta platforms</div>
+                </div>
+                <div class="setting-control">
+                    <div class="toggle-switch active" id="facebookToggle">
+                        <div class="toggle-slider"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-info">
+                    <div class="setting-title">Twitter/X Integration</div>
+                    <div class="setting-description">Enable scanning on Twitter and X platforms</div>
+                </div>
+                <div class="setting-control">
+                    <div class="toggle-switch active" id="twitterToggle">
+                        <div class="toggle-slider"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-info">
+                    <div class="setting-title">Instagram Integration</div>
+                    <div class="setting-description">Enable scanning on Instagram</div>
+                </div>
+                <div class="setting-control">
+                    <div class="toggle-switch active" id="instagramToggle">
+                        <div class="toggle-slider"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="settings-section">
+            <h2 class="section-title">⚙️ Advanced</h2>
+            
+            <div class="setting-item">
+                <div class="setting-info">
+                    <div class="setting-title">API Endpoint</div>
+                    <div class="setting-description">Backend server for analysis (default: localhost:5000)</div>
+                </div>
+                <div class="setting-control">
+                    <input type="text" id="apiEndpoint" value="http://localhost:5000" style="min-width: 200px;">
+                </div>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-info">
+                    <div class="setting-title">Max Images Per Scan</div>
+                    <div class="setting-description">Limit images scanned per page for performance</div>
+                </div>
+                <div class="setting-control">
+                    <input type="number" id="maxImages" value="20" min="1" max="100">
+                </div>
+            </div>
+
+            <div class="api-status">
+                <div class="status-dot" id="apiStatusDot"></div>
+                <span id="apiStatusText">Checking API connection...</span>
+            </div>
+        </div>
+
+        <button class="save-button" id="saveSettings">💾 Save Settings</button>
+        
+        <div class="status-message" id="statusMessage"></div>
+    </div>
+
+    <script src="js/options.js"></script>
+</body>
+</html>

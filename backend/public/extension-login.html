@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BeeDetection Pro - Extension Login</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="email"]:focus,
+        input[type="password"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+            margin-bottom: 20px;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .login-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .register-link {
+            color: #667eea;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .register-link:hover {
+            text-decoration: underline;
+        }
+
+        .error {
+            color: #e74c3c;
+            font-size: 14px;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #ffeaea;
+            border-radius: 5px;
+            display: none;
+        }
+
+        .success {
+            color: #27ae60;
+            font-size: 14px;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #eafaf1;
+            border-radius: 5px;
+            display: none;
+        }
+
+        .extension-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .loading {
+            display: none;
+            margin: 10px 0;
+        }
+
+        .spinner {
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #667eea;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo">🐝</div>
+        <h1 class="title">BeeDetection Pro</h1>
+        <p class="subtitle">Conectați-vă pentru a accesa funcțiile premium din extensie</p>
+        
+        <div class="error" id="errorMessage"></div>
+        <div class="success" id="successMessage"></div>
+        <div class="loading" id="loadingIndicator">
+            <div class="spinner"></div>
+        </div>
+
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Parolă</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            
+            <button type="submit" class="login-btn" id="loginBtn">
+                Conectați-vă pentru extensie
+            </button>
+        </form>
+
+        <p>
+            Nu aveți cont? 
+            <a href="/register.html" class="register-link">Înregistrați-vă aici</a>
+        </p>
+
+        <div class="extension-info">
+            <strong>📱 Pentru Chrome Extension:</strong><br>
+            După autentificare, extensia va fi conectată automat la contul dvs. și veți avea acces la toate funcțiile premium!
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = window.location.origin;
+        
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const errorDiv = document.getElementById('errorMessage');
+            const successDiv = document.getElementById('successMessage');
+            const loadingDiv = document.getElementById('loadingIndicator');
+            const loginBtn = document.getElementById('loginBtn');
+            
+            // Reset messages
+            errorDiv.style.display = 'none';
+            successDiv.style.display = 'none';
+            loadingDiv.style.display = 'block';
+            loginBtn.disabled = true;
+            loginBtn.textContent = 'Se conectează...';
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // Success
+                    successDiv.textContent = 'Autentificare reușită! Se configurează extensia...';
+                    successDiv.style.display = 'block';
+                    
+                    // Send data to extension if it exists
+                    if (window.chrome && window.chrome.runtime) {
+                        try {
+                            // Try to communicate with extension
+                            window.postMessage({
+                                type: 'EXTENSION_LOGIN_SUCCESS',
+                                token: data.token,
+                                email: email,
+                                isPremium: data.user?.isPremium || false,
+                                user: data.user
+                            }, '*');
+                        } catch (err) {
+                            console.log('Extension communication not available');
+                        }
+                    }
+                    
+                    // Store in localStorage as backup
+                    localStorage.setItem('extensionAuth', JSON.stringify({
+                        token: data.token,
+                        email: email,
+                        isPremium: data.user?.isPremium || false,
+                        user: data.user
+                    }));
+                    
+                    // Redirect to dashboard after delay
+                    setTimeout(() => {
+                        window.location.href = '/userDashboard.html';
+                    }, 2000);
+                    
+                } else {
+                    // Error
+                    errorDiv.textContent = data.message || 'Eroare la autentificare';
+                    errorDiv.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                errorDiv.textContent = 'Eroare de conexiune. Verificați conexiunea la internet.';
+                errorDiv.style.display = 'block';
+            } finally {
+                loadingDiv.style.display = 'none';
+                loginBtn.disabled = false;
+                loginBtn.textContent = 'Conectați-vă pentru extensie';
+            }
+        });
+
+        // Listen for extension messages
+        window.addEventListener('message', (event) => {
+            if (event.data.type === 'EXTENSION_AUTH_REQUEST') {
+                // Extension is requesting auth info
+                const authData = localStorage.getItem('extensionAuth');
+                if (authData) {
+                    window.postMessage({
+                        type: 'EXTENSION_LOGIN_SUCCESS',
+                        ...JSON.parse(authData)
+                    }, '*');
+                }
+            }
+        });
+
+        // Check if user is already logged in
+        window.addEventListener('load', () => {
+            const authData = localStorage.getItem('extensionAuth');
+            if (authData) {
+                const successDiv = document.getElementById('successMessage');
+                successDiv.textContent = 'Sunteți deja conectat! Redirecting...';
+                successDiv.style.display = 'block';
+                
+                setTimeout(() => {
+                    window.location.href = '/userDashboard.html';
+                }, 1000);
+            }
+        });
+    </script>
+</body>
+</html>
